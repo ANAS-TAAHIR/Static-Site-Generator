@@ -13,11 +13,10 @@ class TextType(Enum):
 class TextNode:
     def __init__(self, text, text_type, url=None):
         self.text = text
-        if text_type in TextType.__members__:
+        if text_type in TextType:
             self.type = TextType(text_type)
         else:
             raise ValueError("Invalid text type")
-        print(self.type)
         self.url = url
 
     def __eq__(self, value):
