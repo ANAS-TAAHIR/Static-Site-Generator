@@ -78,3 +78,81 @@ class TestExtract(unittest.TestCase):
                 ("to youtube", "https://www.youtube.com/@bootdotdev"),
             ],
         )
+
+
+class TestLinkSplit(unittest.TestCase):
+    def test_split_nodes_link_basic(self):
+        node = TextNode("Hello [world](https://example.com)!", TextType.TEXT)
+        result = split_nodes_link([node])
+        self.assertEqual(
+            str(result),
+            "[TextNode(Hello , text, None), TextNode(world, link, https://example.com), TextNode(!, text, None)]",
+        )
+
+    def test_split_nodes_link_empty(self):
+        node = TextNode("[world](https://example.com)", TextType.TEXT)
+        result = split_nodes_link([node])
+        self.assertEqual(str(result), "[TextNode(world, link, https://example.com)]")
+
+    def test_split_nodes_link_multiple(self):
+        node = TextNode("This has [two](url1) different [links](url2)", TextType.TEXT)
+        result = split_nodes_link([node])
+        self.assertEqual(
+            str(result),
+            "[TextNode(This has , text, None), TextNode(two, link, url1), TextNode( different , text, None), TextNode(links, link, url2)]",
+        )
+
+    def test_split_nodes_link_no_links(self):
+        node = TextNode("Hello world!", TextType.TEXT)
+        result = split_nodes_link([node])
+        self.assertEqual(str(result), "[TextNode(Hello world!, text, None)]")
+
+    def test_split_nodes_with_multiple_nodes(self):
+        node = TextNode("Hello world!", TextType.TEXT)
+        node2 = TextNode("[world](https://example.com)", TextType.TEXT)
+        result = split_nodes_link([node, node2])
+        self.assertEqual(
+            str(result),
+            "[TextNode(Hello world!, text, None), TextNode(world, link, https://example.com)]",
+        )
+
+
+class TestImageSplit(unittest.TestCase):
+    def test_split_nodes_image_basic(self):
+        node = TextNode("Hello ![world](https://example.com/img.png)!", TextType.TEXT)
+        result = split_nodes_image([node])
+        self.assertEqual(
+            str(result),
+            "[TextNode(Hello , text, None), TextNode(world, image, https://example.com/img.png), TextNode(!, text, None)]",
+        )
+
+    def test_split_nodes_image_empty(self):
+        node = TextNode("![world](https://example.com/img.png)", TextType.TEXT)
+        result = split_nodes_image([node])
+        self.assertEqual(
+            str(result), "[TextNode(world, image, https://example.com/img.png)]"
+        )
+
+    def test_split_nodes_image_multiple(self):
+        node = TextNode(
+            "This has ![two](url1.png) different ![images](url2.png)", TextType.TEXT
+        )
+        result = split_nodes_image([node])
+        self.assertEqual(
+            str(result),
+            "[TextNode(This has , text, None), TextNode(two, image, url1.png), TextNode( different , text, None), TextNode(images, image, url2.png)]",
+        )
+
+    def test_split_nodes_image_no_images(self):
+        node = TextNode("Hello world!", TextType.TEXT)
+        result = split_nodes_image([node])
+        self.assertEqual(str(result), "[TextNode(Hello world!, text, None)]")
+
+    def test_split_nodes_image_with_multiple_nodes(self):
+        node = TextNode("![world](https://example.com/img.png)", TextType.TEXT)
+        node2 = TextNode("Hello world!", TextType.TEXT)
+        result = split_nodes_image([node, node2])
+        self.assertEqual(
+            str(result),
+            "[TextNode(world, image, https://example.com/img.png), TextNode(Hello world!, text, None)]",
+        )
